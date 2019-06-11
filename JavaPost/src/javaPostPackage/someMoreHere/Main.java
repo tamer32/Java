@@ -16,8 +16,9 @@ public class Main {
 	//!!!! Na4i Iliq vij po nadolu shte ti go markiram
 	
 	
-	static ArrayList<String> fifo = new ArrayList<String>();
+	static LinkedList<String> fifo = new LinkedList<String>();
 	public static int isThisCourier = 0;
+	
 	public static void inputField() {
 		System.out.println("Моля, въведете номера на желаната функция");
 		System.out.println("1. Регистрация");
@@ -46,17 +47,18 @@ public class Main {
 				
 	}
 	public static int loginCheck(String username, String password) {
-		// Ei tva se ebava... A otgore go vikam
+		
 		boolean correctUsername = false;
 		boolean correctPass = false;
 		boolean isCourier = false;
 		for (int i = 0; i < fifo.size(); i++) {
 			System.out.println(fifo.get(i));
-			if(username == ("ime")){
+			
+			if(username.equals(fifo.get(i))){
 				correctUsername = true;
-			}if(password == (fifo.get(i))){
+			}if(password.equals( fifo.get(i))){
 				correctPass = true;
-			}if(fifo.get(i).matches("^[A-Z]{2}\\d{4}[A-Z]")){
+			}if(fifo.get(i).matches("^[A-Z]{2}\\d{4}[A-Z]{2}")){
 				isCourier = true;
 			}
 		}	
@@ -68,26 +70,39 @@ public class Main {
 		return 0;
 	}
 	
-	public static void registrationLogicForOfficeEmp(){
-		//creating the obj
-		OfficeEmployee empN = new OfficeEmployee();
-		Scanner scan = new Scanner(System.in);
-		System.out.print("Въведете име: ");
-		String input = scan.nextLine();
-		empN.setName(input);
-		System.out.print("Въведете фамилия: ");
-		String lastName = scan.nextLine();
-		empN.setLastName(lastName);
-		System.out.print("Въведете потребителско име: ");
-		String username = scan.nextLine();
-		empN.setUsername(username);
-		System.out.print("Въведете парола: ");
-		String password = scan.nextLine();
-		empN.setPassword(password);
-		System.out.print("Въведете e-mail: ");
-		String email = scan.nextLine();
-		empN.setEmail(email);
+	public static boolean checkIfExists(String username, String emailOrCarNumber) {
 		
+		for (int i = 0; i < fifo.size(); i++) {
+			if(username.equals(fifo.get(i))|| emailOrCarNumber.equals(fifo.get(i))){
+				return true;
+				
+			}
+		}
+		return false;
+	}
+	public static boolean checkIfExists(String username) {
+		
+		for (int i = 0; i < fifo.size(); i++) {
+			if(username.equals(fifo.get(i))){
+				return true;
+				
+			}
+		}
+		return false;
+	}
+	public static void messedgeHandling(Scanner in,PrintStream fileWriter) {
+		System.out.println("Моля въведете за кого е съобщението: ");
+		String sInp = in.next();
+		do {
+			System.out.println("Потребителското име е сбъркано или не съществува! Моля опитайте отново");
+			//messedgeHandling(in,fileWriter);
+			
+		}while(!(checkIfExists(sInp)));
+		fileWriter.print(sInp);
+		System.out.print("Моля въведете съобщението");
+		sInp = in.nextLine();
+				
+		fileWriter.print(sInp);
 	}
 	
 	public static void fileDataToList(File file) throws FileNotFoundException {
@@ -108,55 +123,93 @@ public class Main {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		
 		File file = new File("users.dat");
 		PrintStream fileWriter = new PrintStream(new FileOutputStream("users.dat",true));
+		File fileMessages = new File("Messages.dat");
+		PrintStream fileWriterMessages = new PrintStream(new FileOutputStream("Messages.dat",true));
 		if(!(file.exists())) {
 			file.createNewFile();	
 		}	
-		
+		fileDataToList(file);
 		System.out.println(fifo.size());
-		
+		Courier courier = new Courier();
+		OfficeEmployee emp = new OfficeEmployee();
 		//pretty much the UI
 		inputField();
 		Scanner in = new Scanner(System.in);
 		int inp = in.nextInt();
 		
 		switch (inp) {
-		//for Registration
+		
 		case 1:
+			//register
 			registerField();
 			inp = in.nextInt();
 				switch(inp) {
 				
 				case 1:
-					registrationLogicForOfficeEmp();
+					emp.registrationForOfficeEmp();
+					while(checkIfExists(OfficeEmployee.getUsername(),OfficeEmployee.getEmail())){
+						System.out.println("Потребителското име или Имейла вече съществуват, моля опитайте отново: ");
+						emp.registrationForOfficeEmp();
+					}
+					fifo.clear();
 					fileWriter.print(OfficeEmployee.getName() + " ");
 					fileWriter.print(OfficeEmployee.getLastName() + " ");
 					fileWriter.print(OfficeEmployee.getUsername() + " ");
 					fileWriter.print(OfficeEmployee.getPassword() + " ");
 					fileWriter.print(OfficeEmployee.getEmail() + " ");
 					fileWriter.close();
-					if(file.exists()) {	
-						fileDataToList(file);
-					}
 					main(args);
 					
-					break;
+				case 2:
+					courier.registrationForCourier();
+					while(checkIfExists(courier.getUsername(),courier.getCarNumber())) {
+						System.out.println("Потребителското име или номерът на колата вече съществуват, моля опитайте отново: ");
+						courier.registrationForCourier();
+						
+					}
+					fifo.clear();
+					fileWriter.print(Courier.getName() + " ");
+					fileWriter.print(Courier.getLastName() + " ");
+					fileWriter.print(Courier.getUsername() + " ");
+					fileWriter.print(Courier.getPassword() + " ");
+					fileWriter.print(Courier.getCarNumber() + " ");
+					fileWriter.close();
+					main(args);
+				
 				}
-
-			break;
+		
 		case 2:
-			fileDataToList(file);
+			//login
 			loginField(in);
 			if( isThisCourier == 1){
-				Courier courier = new Courier();
-				courier.courierGuiAfterLogin();
+				courier.courierGuiAfterLogin();	
+				inp =in.nextInt();
+					switch(inp) {
+					//after successful login as Courier
+					case 1:
+						break;
+					case 2:
+						//sending message for courier
+						messedgeHandling(in,fileWriterMessages);
+						break;
+				}
 			}else if(isThisCourier == 2) {
-				OfficeEmployee emp = new OfficeEmployee();
 				emp.officeEmpGuiAfterLogin();
+				in.nextInt();
+				switch(inp) {
+				case 1:
+					break;
+				case 2:
+					//sending message for Office Emp
+					messedgeHandling(in,fileWriterMessages);
+				
+				}
+			
 			}else {
 				System.out.println("Грешно потребителско име или парола: ");
+				fifo.clear();
 				main(args);
 			}
 			
