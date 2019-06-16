@@ -25,6 +25,10 @@ public class Courier extends Employee{
 		Scanner scan = new Scanner(System.in);
 		System.out.print("Въведете номер на колата: ");
 		String carNumber = scan.nextLine();
+		while (!(carNumber.matches("^[A-Z]{2}\\d{4}[A-Z]{2}"))) { 
+			System.out.println("Невалиден номер на колата! Моля проверете го и опитайте отново");
+			carNumber = scan.nextLine();
+		}
 		this.setCarNumber(carNumber);
 	}
 }

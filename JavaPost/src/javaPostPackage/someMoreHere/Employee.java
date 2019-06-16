@@ -2,7 +2,7 @@ package javaPostPackage.someMoreHere;
 import java.io.*;
 import java.util.Scanner;
 
-public class Employee {
+public abstract class Employee {
 	public static String name;
 	public static String lastName;
 	public static String username;

@@ -14,7 +14,7 @@ public class OfficeEmployee extends Employee {
 		this.email = email;
 	}
 	public void officeEmpGuiAfterLogin(){
-		System.out.print("1. Търсене на куриер: ");
+		System.out.println("1. Търсене на куриер: ");
 		super.guiAfterLogin();
 		
 	}
